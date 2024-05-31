@@ -1,13 +1,14 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
+from CodeValidator import CodeValidator
 # from typing import List, Dict, Optional
 
 app = FastAPI()
+code_validator = CodeValidator()
 
-class SubmissionCreate(BaseModel):
-    user_id: str
-    ## fill in
+class srcDocString(BaseModel):
+    content: str
 
 class SubmissionResponse(BaseModel):
     id: int
@@ -27,9 +28,21 @@ app.add_middleware(
 @app.get("/")
 async def helloWorld():
     return {
-        "data" : "Hello World"
+        "data" : "Hello Code Validator"
     }
 
-# @app.post("/submissions/", response_model=SubmissionResponse)
-# def create_submission(submission: SubmissionCreate, db: Session = Depends(get_db)):
-#     ### SUBMISSION LOGIC TO BD
+
+@app.post("/process_html/")
+async def process_html(data: srcDocString):
+    srcDocString = data.content
+    # do stuff
+    # Here you can process the HTML content, e.g., store it in the database, test, etc.
+
+    # TODO: validation service returns result (decide return type)
+
+    validationResult = code_validator.validate_HTML_CSS_JS_Code(srcDocString)
+    payload = {
+        "message": "HTML String content received and processed.. wtv not", 
+        "validation_outcome": validationResult
+    }
+    return payload

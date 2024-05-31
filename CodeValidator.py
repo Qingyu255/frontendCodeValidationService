@@ -1,9 +1,17 @@
 class CodeValidator:
     def __init__(self):
-        code_submission = ""
+        srcDoc = ''
 
-    def validateCodeSyntax(self):
+    def validate_HTML_CSS_JS_Code(self, srcDoc):
         """checks if code has invalid syntax"""
-        return True
+        error_message = ""
+
+        # code validation here...
+
+        error_message = "Password Input absent"
+        return {
+            "isCorrectSolution" : True,
+            "error_message" : error_message
+        }
     
     
