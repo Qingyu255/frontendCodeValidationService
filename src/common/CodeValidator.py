@@ -4,24 +4,36 @@ from multiprocessing import Process
 from common.repositories.submission import SubmissionRepository
 
 class CodeValidator:
-    def validate_HTML_CSS_JS_Code(self, srcDoc, question_id, submission_id):
-        """checks if code has invalid syntax"""
+
+    def handle_submission(self, submission_type, question_id, submission_id, raw_string):
+        try:
+            handler = getattr(self, f"handle_{submission_type}")(raw_string, question_id)
+        except AttributeError:
+            handler = self.handle_unsupported
+        
+        print(handler)
+
+    def handle_html(self, raw_string, question_id):
         with open("index.html", "w") as infile:
-            infile.write(srcDoc)
+            infile.write(raw_string)
 
         p = Process(target=self.start_server)
         p.start()
-        time.sleep(3)
+        time.sleep(5)
+
         result = subprocess.run(
             ["env/bin/python", f"src/validation_scripts/{question_id}.py"], 
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             text=True
         )
-        print(result)
         p.terminate()
-        print("hello world")
-        submission_repository = SubmissionRepository()
+        return result.returncode
+    
+    def handle_unsupported(self):
+        pass
+
+
         if result.returncode == 1:
             submission_repository.updateSubmission(submission_id, "fail")
             return {

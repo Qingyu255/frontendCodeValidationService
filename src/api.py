@@ -3,6 +3,8 @@ from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from common.CodeValidator import CodeValidator
+from common.repositories.submission import SubmissionRepository
+import asyncio
 import uvicorn
 # from typing import List, Dict, Optional
 
@@ -41,21 +43,31 @@ async def helloWorld():
     }
 
 
-@app.post("/process_html/")
-async def process_html(req: SubmissionRequest):
-    print(req)
-    # do stuff
-    # Here you can process the HTML content, e.g., store it in the database, test, etc.
+@app.post("/submission/")
+async def submission(req: SubmissionRequest):
+    try:
+        print("Creating task...")
+        asyncio.create_task(handle_submission(req))
+        print("Created task! Now processing asynchronously")
+        return { "statusCode": 200 }
+    except Exception as e:
+        print("Error: ", e)
+        return { "statusCode": 500 }
 
-    # TODO: validation service returns result (decide return type)
-
-    validationResult = code_validator.validate_HTML_CSS_JS_Code(req.code, req.questionId, req.id)
-    print("Completed Result: ", validationResult)
-    payload = {
-        "message": "HTML String content received and processed.. wtv not", 
-        "validation_outcome": validationResult
-    }
-    return payload
+async def handle_submission(req: SubmissionRequest):
+    validation_result = code_validator.handle_submission(
+        submission_type=req.language,
+        question_id=req.questionId,
+        submission_id=req.id,
+        raw_string=req.code
+    )
+    
+    submission_repository = SubmissionRepository()
+    if validation_result:
+        submission_repository.updateSubmission(req.id, "fail")
+    else:
+        submission_repository.updateSubmission(req.id, "success")
+    return
 
 if __name__ == "__main__":
     uvicorn.run(app, port=5000)

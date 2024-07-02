@@ -17,7 +17,7 @@ class SubmissionRepository():
                     result_to_update = "a2d50ed8-d404-4ad4-94f0-9bde4f16aecd"
                 case "default":
                     status_to_update = "002aa7db-a589-409a-836e-f351b14a2442"
-                    raise Exception("Unsupported method")
+                    result_to_update = "a2d50ed8-d404-4ad4-94f0-9bde4f16aecd"
             cur.execute("""
             update "frontendLeetcode_submission" set status=(%s), result=(%s)
             where id=(%s)
