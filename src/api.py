@@ -2,28 +2,14 @@ from typing import Optional
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-from common.CodeValidator import CodeValidator
-from common.repositories.submission import SubmissionRepository
+from common.CodeValidatorService import CodeValidatorService
+from common.repositories.SubmissionService import SubmissionService
 import asyncio
 import uvicorn
-# from typing import List, Dict, Optional
+from models.models import SubmissionRequest, ValidationResultModel
 
 app = FastAPI()
-code_validator = CodeValidator()
-
-class SubmissionRequest(BaseModel):
-    id: str
-    userId: str
-    questionId: str
-    language: str
-    code: str
-    status: str
-    result: Optional[str]
-    createdAt: str
-
-class SubmissionResponse(BaseModel):
-    id: int
-    ## fill in
+code_validator = CodeValidatorService()
 
 # Add CORS middleware
 app.add_middleware(
@@ -36,6 +22,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# acts as a cache for active submissions, stores ValidationResultModel objects (basically our responses)
+submission_status_store = {}
+
 @app.get("/")
 async def helloWorld():
     return {
@@ -46,28 +35,48 @@ async def helloWorld():
 @app.post("/submission/")
 async def submission(req: SubmissionRequest):
     try:
+        submissionId = req.id
+        submission_status_store[submissionId] = {"status": "processing"}
         print("Creating task...")
         asyncio.create_task(handle_submission(req))
         print("Created task! Now processing asynchronously")
-        return { "statusCode": 200 }
+        return {"statusCode": 200, "message": "Submission received", "submission_id": submissionId}
     except Exception as e:
         print("Error: ", e)
-        return { "statusCode": 500 }
+        raise HTTPException(status_code=500, detail="Internal Server Error")
+
+
+@app.get("/submission_status/{submission_id}")
+async def get_submission_status(submission_id: str) -> ValidationResultModel:
+    print("submission_status_store: " + str(submission_status_store))
+    if submission_id not in submission_status_store:
+        raise HTTPException(status_code=404, detail="Submission ID not found")
+
+    return submission_status_store[submission_id]
+
 
 async def handle_submission(req: SubmissionRequest):
-    validation_result = code_validator.handle_submission(
+    # see model for validation_result in models/models.py
+    validationResultObj = code_validator.handle_submission(
         submission_type=req.language,
         question_id=req.questionId,
         submission_id=req.id,
         raw_string=req.code
     )
-    
-    submission_repository = SubmissionRepository()
-    if validation_result:
+
+    isCorrectAnswer = validationResultObj.isCorrectAnswer
+    # errorStackTrace = validation_result.errorStackTrace
+    # logs = validation_result.logs
+
+    print("DEBUG: validation result at api.py --> handle_submission: " + str(validationResultObj))
+    submission_repository = SubmissionService()
+    if not isCorrectAnswer:
         submission_repository.updateSubmission(req.id, "fail")
     else:
         submission_repository.updateSubmission(req.id, "success")
-    return
+
+    # store in cache
+    submission_status_store[req.id] = validationResultObj
 
 if __name__ == "__main__":
     uvicorn.run(app, port=5000)

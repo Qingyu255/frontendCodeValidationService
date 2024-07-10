@@ -1,6 +1,6 @@
 from common.database import DatabaseConnector
 
-class SubmissionRepository():
+class SubmissionService():
     def __init__(self):
         self.conn = DatabaseConnector().conn
 
