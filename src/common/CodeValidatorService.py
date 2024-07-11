@@ -11,7 +11,7 @@ class CodeValidatorService:
     def __init__(self) -> None:
         self.supportedLanguages = ["html"]
 
-    def handle_submission(self, submission_type, question_id, submission_id, raw_string):
+    def handle_validation(self, submission_type, question_id, submission_id, raw_string):
         try:
             # handler = getattr(self, f"handle_{submission_type}")(raw_string, question_id)
             if submission_type.lower() not in self.supportedLanguages:
@@ -59,6 +59,7 @@ class CodeValidatorService:
             logs = str(stdOut).split("--")
 
             return ValidationResultModel(
+                status="processed",
                 isCorrectAnswer=isCorrectAnswer,
                 errorStackTrace=errorStackTrace,
                 logs=logs

@@ -1,7 +1,7 @@
 from pydantic import BaseModel
 from typing import Optional, List
 
-class SubmissionRequest(BaseModel):
+class SubmissionRequestModel(BaseModel):
     id: str
     userId: str
     questionId: str
@@ -11,11 +11,12 @@ class SubmissionRequest(BaseModel):
     result: Optional[str] = None
     createdAt: str
 
-class SubmissionResponse(BaseModel):
-    id: int
-    ## fill in
+class SubmissionAcknowledgementModel(BaseModel):
+    status: str
+    id: str
 
 class ValidationResultModel(BaseModel):
+    status: str
     isCorrectAnswer: bool
     errorStackTrace: str
     logs: Optional[List[str]] = None

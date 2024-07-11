@@ -32,10 +32,13 @@ try:
 
     if passedAssertions == totalAssertions:
         print("Correct Answer: All tests passed!")
-    else:
-        print(f"Incorrect Answer: {passedAssertions} out of {totalAssertions} passed")
+        
 
 except AssertionError as e:
+    print(f"Incorrect Answer: {passedAssertions} out of {totalAssertions} tests passed")
     raise(e)
+except Exception as e:
+    print(f"DEBUG: An unexpected error occurred: {str(e)}")
+    raise e
 finally:
     driver.quit()

@@ -6,10 +6,10 @@ from common.CodeValidatorService import CodeValidatorService
 from common.repositories.SubmissionService import SubmissionService
 import asyncio
 import uvicorn
-from models.models import SubmissionRequest, ValidationResultModel
+from models.models import SubmissionRequestModel, SubmissionAcknowledgementModel, ValidationResultModel
 
 app = FastAPI()
-code_validator = CodeValidatorService()
+codeValidatorService = CodeValidatorService()
 
 # Add CORS middleware
 app.add_middleware(
@@ -32,21 +32,25 @@ async def helloWorld():
     }
 
 
-@app.post("/submission/")
-async def submission(req: SubmissionRequest):
+@app.post("/submission", response_model=SubmissionAcknowledgementModel)
+async def submission(req: SubmissionRequestModel) -> SubmissionAcknowledgementModel:
     try:
         submissionId = req.id
         submission_status_store[submissionId] = {"status": "processing"}
         print("Creating task...")
         asyncio.create_task(handle_submission(req))
         print("Created task! Now processing asynchronously")
-        return {"statusCode": 200, "message": "Submission received", "submission_id": submissionId}
+        # return {"statusCode": 200, "message": "Submission received", "submission_id": submissionId}
+        return SubmissionAcknowledgementModel(
+            status="processing",
+            id=submissionId
+        )
     except Exception as e:
         print("Error: ", e)
         raise HTTPException(status_code=500, detail="Internal Server Error")
 
 
-@app.get("/submission_status/{submission_id}")
+@app.get("/submission_status/{submission_id}", response_model=ValidationResultModel)
 async def get_submission_status(submission_id: str) -> ValidationResultModel:
     print("submission_status_store: " + str(submission_status_store))
     if submission_id not in submission_status_store:
@@ -55,9 +59,9 @@ async def get_submission_status(submission_id: str) -> ValidationResultModel:
     return submission_status_store[submission_id]
 
 
-async def handle_submission(req: SubmissionRequest):
+async def handle_submission(req: SubmissionRequestModel):
     # see model for validation_result in models/models.py
-    validationResultObj = code_validator.handle_submission(
+    validationResultObj = codeValidatorService.handle_validation(
         submission_type=req.language,
         question_id=req.questionId,
         submission_id=req.id,
