@@ -81,7 +81,12 @@ class CodeValidatorService:
 
     def get_available_port(self):
         """returns an open port so that we do not try to run 2 http servers on the same port"""
-        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-            s.bind(('', 0))
-            s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-            return s.getsockname()[1]
+        try:
+            with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+                s.bind(('', 0))
+                s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+                return s.getsockname()[1]
+        except Exception as e:
+            print("Error: unable to get open socket")
+            raise
+

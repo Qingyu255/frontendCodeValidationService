@@ -36,7 +36,7 @@ async def helloWorld():
 async def submission(req: SubmissionRequestModel) -> SubmissionAcknowledgementModel:
     try:
         submissionId = req.id
-        submission_status_store[submissionId] = {"status": "processing"}
+        submission_status_store[submissionId] = {"isCorrectAnswer":False, "errorStackTrace":"", "status": "processing"}
         print("Creating task...")
         asyncio.create_task(handle_submission(req))
         print("Created task! Now processing asynchronously")
@@ -52,7 +52,6 @@ async def submission(req: SubmissionRequestModel) -> SubmissionAcknowledgementMo
 
 @app.get("/submission_status/{submission_id}", response_model=ValidationResultModel)
 async def get_submission_status(submission_id: str) -> ValidationResultModel:
-    print("submission_status_store: " + str(submission_status_store))
     if submission_id not in submission_status_store:
         raise HTTPException(status_code=404, detail="Submission ID not found")
 
