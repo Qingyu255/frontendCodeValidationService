@@ -5,10 +5,10 @@ import os
 import logging
 
 load_dotenv(find_dotenv())
-DB_NAME = os.environ.get("POSTGRES_DATABASE")
-DB_HOST = os.environ.get("POSTGRES_HOST")
-DB_USERNAME = os.environ.get("POSTGRES_USER")
-DB_PASSWORD = os.environ.get("POSTGRES_PASSWORD")
+DB_NAME = os.getenv("POSTGRES_DATABASE")
+DB_HOST = os.getenv("POSTGRES_HOST")
+DB_USERNAME = os.getenv("POSTGRES_USER")
+DB_PASSWORD = os.getenv("POSTGRES_PASSWORD")
 
 logging.basicConfig(
     level=logging.INFO,
@@ -35,7 +35,7 @@ class DatabaseConnectorMetaclass(type):
 class DatabaseConnector(metaclass=DatabaseConnectorMetaclass):
     def __init__(self):
         try:
-            logger.info("Attempting to connect to postgres")
+            logger.info("Attempting to connect to postgres host: %s", DB_NAME)
             self.conn = psycopg2.connect(dbname=DB_NAME, user=DB_USERNAME, password=DB_PASSWORD, host=DB_HOST)
             logger.info("Successfully connected to postgres")
         except:
