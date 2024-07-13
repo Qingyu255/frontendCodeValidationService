@@ -1,6 +1,13 @@
+## Frontend Code Validation service
+This API service validates HTML/CSS/JS code against selenium test scripts for our frontend-leetcode project
+
+
 ### Docker CLI commands :
+```
 docker build -t frontend-code-validation-service .      
-docker run -d -p 8000:8080 frontend-code-validation-service
+docker run -d -p 5050:5000 frontend-code-validation-service
+```
+> host port: 5050
 
 ### To run locally: ###
 ```
@@ -10,5 +17,7 @@ source env/bin/activate
 python src/api.py
 ```
 
+>host port: 5000
+
 ### Open Swagger UI ###
-http://127.0.0.1:5000/docs<br>
+http://\<api-endpoint\>/docs
