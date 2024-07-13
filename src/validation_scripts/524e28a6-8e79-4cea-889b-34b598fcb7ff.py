@@ -18,6 +18,8 @@ else:
     chromeOptions.add_argument("--headless")
     driver = webdriver.Chrome(service=service, options=chromeOptions)
 
+port = sys.argv[1]
+
 try:
     driver.get(f"http://127.0.0.1:{port}")
 
