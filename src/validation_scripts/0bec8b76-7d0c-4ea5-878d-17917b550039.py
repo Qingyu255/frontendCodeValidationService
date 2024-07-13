@@ -1,11 +1,24 @@
-import sys
+import os
 from selenium import webdriver
 from selenium.webdriver.common.by import By
+from selenium.webdriver.chrome.service import Service
+from selenium.webdriver.chrome.options import Options
+import sys
 import time
 
+if os.environ.get("ENVIRONMENT") is not None and os.environ.get("ENVIRONMENT").lower() == "dev":
+    chromeOptions = Options()
+    chromeOptions.add_argument("--headless=new")
+    driver = webdriver.Chrome()
+    driver = webdriver.Chrome(options=chromeOptions)
+else:
+    # prod settings for docker container
+    service = Service("/usr/bin/chromedriver")
+    chromeOptions = Options()
+    chromeOptions.add_argument("--headless")
+    driver = webdriver.Chrome(service=service, options=chromeOptions)
 
 port = sys.argv[1]
-driver = webdriver.Firefox()
 
 try:
     # Open the webpage using the port number provided
@@ -39,8 +52,8 @@ try:
     # Verify remove button is present and styled correctly
     remove_button = task_items[0].find_element(By.CLASS_NAME, 'remove-button')
     assert remove_button.is_displayed(), "Remove button should be displayed"
-    assert remove_button.value_of_css_property('background-color') == 'rgb(255, 0, 0)', "Remove button background color should be red"
-    assert remove_button.value_of_css_property('color') == 'rgb(255, 255, 255)', "Remove button text color should be white"
+    assert remove_button.value_of_css_property('background-color') == 'rgba(255, 0, 0, 1)', "Remove button background color should be red"
+    assert remove_button.value_of_css_property('color') == 'rgba(255, 255, 255, 1)', "Remove button text color should be white"
     print("PASS: Remove button is present and styled correctly.--")
     passedAssertions += 1
 

@@ -1,10 +1,25 @@
+import os
 from selenium import webdriver
 from selenium.webdriver.common.by import By
+from selenium.webdriver.chrome.service import Service
+from selenium.webdriver.chrome.options import Options
 import sys
 import time
 
+if os.environ.get("ENVIRONMENT") is not None and os.environ.get("ENVIRONMENT").lower() == "dev":
+    chromeOptions = Options()
+    chromeOptions.add_argument("--headless=new")
+    driver = webdriver.Chrome()
+    driver = webdriver.Chrome(options=chromeOptions)
+else:
+    # prod settings for docker container
+    service = Service("/usr/bin/chromedriver")
+    chromeOptions = Options()
+    chromeOptions.add_argument("--headless")
+    driver = webdriver.Chrome(service=service, options=chromeOptions)
+
 port = sys.argv[1]
-driver = webdriver.Firefox()
+
 try:
     driver.get(f"http://127.0.0.1:{port}")
 
@@ -18,8 +33,8 @@ try:
 
     # verify CSS
     button = driver.find_element(By.ID, 'incrementButton')
-    assert button.value_of_css_property('background-color') == 'rgb(0, 0, 255)', "Button background color is not blue"
-    print("PASS: Button background color is rgb(0, 0, 255).--")
+    assert button.value_of_css_property('background-color') == 'rgba(0, 0, 255, 1)', f"Button background color is not blue"
+    print("PASS: Button background color is blue.--")
     passedAssertions += 1
 
     # verify JS
@@ -36,9 +51,9 @@ try:
 
 except AssertionError as e:
     print(f"Incorrect Answer: {passedAssertions} out of {totalAssertions} tests passed")
-    raise(e)
+    raise e
 except Exception as e:
-    print(f"DEBUG: An unexpected error occurred: {str(e)}")
+    print(f"An unexpected error occurred: {str(e)}")
     raise e
 finally:
     driver.quit()

@@ -1,10 +1,24 @@
-import sys
+import os
 from selenium import webdriver
 from selenium.webdriver.common.by import By
+from selenium.webdriver.chrome.service import Service
+from selenium.webdriver.chrome.options import Options
+import sys
 import time
 
+if os.environ.get("ENVIRONMENT") is not None and os.environ.get("ENVIRONMENT").lower() == "dev":
+    chromeOptions = Options()
+    chromeOptions.add_argument("--headless=new")
+    driver = webdriver.Chrome()
+    driver = webdriver.Chrome(options=chromeOptions)
+else:
+    # prod settings for docker container
+    service = Service("/usr/bin/chromedriver")
+    chromeOptions = Options()
+    chromeOptions.add_argument("--headless")
+    driver = webdriver.Chrome(service=service, options=chromeOptions)
+
 port = sys.argv[1]
-driver = webdriver.Firefox()
 
 try:
     # Open the webpage using the port number provided
@@ -16,28 +30,28 @@ try:
     # Verify header properties
     header = driver.find_element(By.TAG_NAME, 'header')
     assert header.value_of_css_property('height') == '60px', "Header height should be 60px"
-    assert header.value_of_css_property('background-color') == 'rgb(204, 204, 204)', "Header background color should be #ccc"
+    assert header.value_of_css_property('background-color') == 'rgba(204, 204, 204, 1)', "Header background color should be #ccc"
     print("PASS: Header height and background color.--")
     passedAssertions += 1
 
     # Verify footer properties
     footer = driver.find_element(By.TAG_NAME, 'footer')
     assert footer.value_of_css_property('height') == '100px', "Footer height should be 100px"
-    assert footer.value_of_css_property('background-color') == 'rgb(204, 204, 204)', "Footer background color should be #ccc"
+    assert footer.value_of_css_property('background-color') == 'rgba(204, 204, 204, 1)', "Footer background color should be #ccc"
     print("PASS: Footer height and background color.--")
     passedAssertions += 1
 
     # Verify left column properties
     left_column = driver.find_element(By.CLASS_NAME, 'left')
     assert left_column.value_of_css_property('width') == '100px', "Left column width should be 100px"
-    assert left_column.value_of_css_property('background-color') == 'rgb(255, 215, 0)', "Left column background color should be #ffd700"
+    assert left_column.value_of_css_property('background-color') == 'rgba(255, 215, 0, 1)', "Left column background color should be #ffd700"
     print("PASS: Left column width and background color.--")
     passedAssertions += 1
 
     # Verify right column properties
     right_column = driver.find_element(By.CLASS_NAME, 'right')
     assert right_column.value_of_css_property('width') == '100px', "Right column width should be 100px"
-    assert right_column.value_of_css_property('background-color') == 'rgb(173, 255, 47)', "Right column background color should be #adff2f"
+    assert right_column.value_of_css_property('background-color') == 'rgba(173, 255, 47, 1)', "Right column background color should be #adff2f"
     print("PASS: Right column width and background color.--")
     passedAssertions += 1
 

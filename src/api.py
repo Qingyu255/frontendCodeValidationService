@@ -7,6 +7,17 @@ from common.repositories.SubmissionService import SubmissionService
 import asyncio
 import uvicorn
 from models.models import SubmissionRequestModel, SubmissionAcknowledgementModel, ValidationResultModel
+import logging
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="SERVICE %(levelname)s: %(message)s",
+    handlers=[
+        logging.StreamHandler()
+    ]
+)
+
+logger = logging.getLogger(__name__)
 
 app = FastAPI()
 codeValidatorService = CodeValidatorService()
@@ -37,16 +48,16 @@ async def submission(req: SubmissionRequestModel) -> SubmissionAcknowledgementMo
     try:
         submissionId = req.id
         submission_status_store[submissionId] = {"isCorrectAnswer":False, "errorStackTrace":"", "status": "processing"}
-        print("Creating task...")
+        logger.info("Creating task...")
         asyncio.create_task(handle_submission(req))
-        print("Created task! Now processing asynchronously")
+        logger.info("Created task! Now processing asynchronously")
         # return {"statusCode": 200, "message": "Submission received", "submission_id": submissionId}
         return SubmissionAcknowledgementModel(
             status="processing",
             id=submissionId
         )
     except Exception as e:
-        print("Error: ", e)
+        logger.error("Unexpected Exception: ", exc_info=True)
         raise HTTPException(status_code=500, detail="Internal Server Error")
 
 
@@ -71,7 +82,7 @@ async def handle_submission(req: SubmissionRequestModel):
     # errorStackTrace = validation_result.errorStackTrace
     # logs = validation_result.logs
 
-    print("DEBUG: validation result at api.py --> handle_submission: " + str(validationResultObj))
+    logger.info("DEBUG: validation result at api.py --> handle_submission: %s", validationResultObj)
     submission_repository = SubmissionService()
     if not isCorrectAnswer:
         submission_repository.updateSubmission(req.id, "fail")

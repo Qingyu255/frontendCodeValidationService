@@ -1,10 +1,22 @@
+import os
 from selenium import webdriver
 from selenium.webdriver.common.by import By
+from selenium.webdriver.chrome.service import Service
+from selenium.webdriver.chrome.options import Options
 import sys
 import time
 
-port = sys.argv[1]
-driver = webdriver.Firefox()
+if os.environ.get("ENVIRONMENT") is not None and os.environ.get("ENVIRONMENT").lower() == "dev":
+    chromeOptions = Options()
+    chromeOptions.add_argument("--headless=new")
+    driver = webdriver.Chrome()
+    driver = webdriver.Chrome(options=chromeOptions)
+else:
+    # prod settings for docker container
+    service = Service("/usr/bin/chromedriver")
+    chromeOptions = Options()
+    chromeOptions.add_argument("--headless")
+    driver = webdriver.Chrome(service=service, options=chromeOptions)
 
 try:
     driver.get(f"http://127.0.0.1:{port}")

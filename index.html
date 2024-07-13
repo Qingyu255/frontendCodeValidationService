@@ -1,1 +1,42 @@
-<h1>Hello World</h1>
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Color Changer</title>
+    <style>
+      body {
+		font-family: Arial, sans-serif;
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		height: 100vh;
+		margin: 0;       }       .container {
+		text-align: center;       }       #colorBox {
+		width: 100px;
+		height: 100px;
+		background-color: red;
+		margin-bottom: 20px;       }       #changeColorButton {
+		padding: 10px 20px;
+		font-size: 1em;
+		cursor: pointer;       }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div id="colorBox"></div>
+      <button id="changeColorButton">Change Color</button>
+    </div>
+    <script>
+      function getRandomColor() {
+		const letters = '0123456789ABCDEF';
+		let color = '#';
+		for (let i = 0; i < 6; i++) {
+		  color += letters[Math.floor(Math.random() * 16)];
+		}
+		return color;       }        document.getElementById('changeColorButton').addEventListener('click', function() {
+		const colorBox = document.getElementById('colorBox');
+		colorBox.style.backgroundColor = getRandomColor();       });
+    </script>
+  </body>
+</html>
