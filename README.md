@@ -5,7 +5,7 @@ This API service validates HTML/CSS/JS code against selenium test scripts for ou
 ### Docker CLI commands :
 ```
 docker build -t frontend-code-validation-service .      
-docker run -d -p 5050:5000 frontend-code-validation-service
+docker run -d -p 5050:8080 frontend-code-validation-service
 ```
 > host port: 5050
 
@@ -17,7 +17,7 @@ source env/bin/activate
 python src/api.py
 ```
 
->host port: 5000
+>host port: 8080
 
 ### Open Swagger UI ###
 http://\<api-endpoint\>/docs

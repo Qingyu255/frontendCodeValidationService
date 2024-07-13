@@ -15,6 +15,6 @@ RUN /bin/bash -c "source /app/venv/bin/activate && pip install --no-cache-dir -r
 
 COPY ["src", "./src"]
 
-EXPOSE 5000
+EXPOSE 8080
 
 CMD ["/app/venv/bin/python", "src/api.py"]
