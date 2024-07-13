@@ -58,7 +58,7 @@ try:
     # Verify center column properties
     center_column = driver.find_element(By.CLASS_NAME, 'center')
     assert center_column.value_of_css_property('flex-grow') == '1', "Center column should be fluid width"
-    assert center_column.value_of_css_property('background-color') == 'rgb(135, 206, 250)', "Center column background color should be #87cefa"
+    assert center_column.value_of_css_property('background-color') == 'rgba(135, 206, 250, 1)', "Center column background color should be #87cefa"
     print("PASS: Center column fluid width and background color.--")
     passedAssertions += 1
 
