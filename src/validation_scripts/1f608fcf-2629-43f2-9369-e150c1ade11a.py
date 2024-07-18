@@ -3,14 +3,20 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
+from webdriver_manager.chrome import ChromeDriverManager
+from selenium.webdriver.chrome.service import Service as ChromeService
 import sys
 import time
 
 if os.environ.get("ENVIRONMENT") is not None and os.environ.get("ENVIRONMENT").lower() == "dev":
     chromeOptions = Options()
     chromeOptions.add_argument("--headless=new")
-    driver = webdriver.Chrome()
-    driver = webdriver.Chrome(options=chromeOptions)
+    chromeOptions.add_argument("--no-sandbox")
+    chromeOptions.add_argument("--disable-dev-shm-usage")
+    driver = webdriver.Chrome(
+        service=ChromeService(ChromeDriverManager().install()),
+        options=chromeOptions
+    )
 else:
     # prod settings for docker container
     service = Service("/usr/bin/chromedriver")
