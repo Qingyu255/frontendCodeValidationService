@@ -9,6 +9,11 @@ import sys
 import http.server
 import socketserver
 import logging
+import os
+import requests
+from tempfile import NamedTemporaryFile
+
+VALIDATION_ENDPOINT = os.environ.get("VALIDATION_ENDPOINT")
 
 logging.basicConfig(
     level=logging.INFO,
@@ -46,6 +51,11 @@ class CodeValidatorService:
         with open("index.html", "w") as infile:
             infile.write(raw_string)
 
+        tf_body = self.get_validation_file(question_id)
+        tf = NamedTemporaryFile()
+        tf.write(tf_body)
+        tf.seek(0)
+
         port = self.get_available_port()
         p = Process(target=self.start_server, args=((port, )))
         p.start()
@@ -56,7 +66,7 @@ class CodeValidatorService:
         errorStackTrace = ""
         try:
             result = subprocess.run(
-                [sys.executable, f"src/validation_scripts/{question_id}.py", str(port)], 
+                [sys.executable, tf.name, str(port)], 
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
                 text=True
@@ -87,6 +97,7 @@ class CodeValidatorService:
             logger.info("Stopping the HTTP server")
             p.terminate()
             # p.join()
+            tf.close()
             logger.info("HTTP server stopped")
             
 
@@ -118,4 +129,17 @@ class CodeValidatorService:
         except Exception as e:
             logger.error("Error: unable to get open socket", exc_info=True)
             raise
+
+    def get_validation_file(self, target_id):
+        """
+        Requests validation endpoint with id to get correspoinding validation file
+        """
+        try:
+            response = requests.get(VALIDATION_ENDPOINT, params={"id": target_id})
+            return response.content
+        except Exception as e:
+            logger.error(f"Error: an exception occured: {e}")
+            raise e
+
+
 
